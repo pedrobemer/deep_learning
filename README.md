@@ -20,5 +20,6 @@ username@usergroup:~$ pip3 install -r venv_requirements.txt
 ```
 
 ** Mhaskar Paper **
+
 URL: https://pdfs.semanticscholar.org/f594/f693903e1507c33670b89612410f823012dd.pdf
 The file mhaskar_paper.py implements the shallow and deep Neural Networks to reproduce the results from the Fig.2.
