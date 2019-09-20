@@ -37,7 +37,7 @@ def main():
         spamwriter.writerow(['MSE', 'Total Parameters', 'Total Units', 'Hidden Layers'])
         for h in hidden_layers:
             #Equation
-            y = lambda x : 2*((2*(cos(x)**2)-1)**2)
+            y = lambda x : 2*((2*(cos(x)**2)-1)**2)-1
 
             #Uniform samples for x in the above equation
             total_samples = int(120e3)
@@ -64,7 +64,7 @@ def main():
                     model.compile(loss='mean_squared_error', optimizer=sgd)
                     model.fit(x_features_train, y_label_train, epochs=2000, batch_size=3000)
                     loss = model.evaluate(x_features_test, y_label_test)
-                    spamwriter.writerow([loss, model.count_params(), h*neurons[j]],h)
+                    spamwriter.writerow([loss, model.count_params(), h*neurons[j],h])
 
 
 main()
