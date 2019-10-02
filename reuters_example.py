@@ -6,6 +6,77 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def case_1(loss, val_loss, acc, val_acc, epochs):
+
+    plt.plot(epochs, loss, 'bo', label='Training loss')
+    plt.plot(epochs, val_loss, 'b', label='Validation loss')
+    plt.title('Training and validation loss for the Baseline')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss (One Hot Entropy)')
+    plt.legend()
+    plt.show()
+
+    plt.clf()
+
+    plt.plot(epochs, acc, 'bo', label='Training acc')
+    plt.plot(epochs, val_acc, 'b', label='Validation acc')
+    plt.title('Training and validation accuracy for the Baseline')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.show()
+
+def case_2(loss, val_loss, acc, val_acc, epochs):
+
+    plt.plot(epochs, loss, 'bo', label='Training loss')
+    plt.plot(epochs, val_loss, 'b', label='Validation loss')
+    plt.title('Training and validation loss for the Baseline')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss (MSE)')
+    plt.legend()
+    plt.show()
+
+    plt.clf()
+
+    plt.plot(epochs, acc, 'bo', label='Training acc')
+    plt.plot(epochs, val_acc, 'b', label='Validation acc')
+    plt.title('Training and validation accuracy for the Baseline')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.show()
+
+def case_3(loss, val_loss, acc, val_acc, epochs):
+
+    plt.plot(epochs, loss, 'bo', label='Training loss')
+    plt.plot(epochs, val_loss, 'b', label='Validation loss')
+    plt.title('Training and validation loss for the Baseline')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss (Binary Entropy)')
+    plt.legend()
+    plt.show()
+
+    plt.clf()
+
+    plt.plot(epochs, acc, 'bo', label='Training acc')
+    plt.plot(epochs, val_acc, 'b', label='Validation acc')
+    plt.title('Training and validation accuracy for the Baseline')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.show()
+
+def plot_graph(case,loss, val_loss, acc, val_acc, epoch):
+
+    epochs = range(1, epoch + 1)
+    switch_case = {
+        1: case_1,
+        2: case_2,
+        3: case_3,
+    }
+
+    func = switch_case.get(case, "There isn't this case")
+    func(loss[case-1], val_loss[case-1], acc[case-1], val_acc[case-1], epochs)
 
 def vectorize_sequences(sequences, dimension=10000):
     results = np.zeros((len(sequences), dimension))
@@ -15,13 +86,19 @@ def vectorize_sequences(sequences, dimension=10000):
     
     return results
 
-def to_natural(label,n_bits):
+def to_natural(label, n_bits):
+    natural_label = np.zeros((len(label), n_bits))
 
     for i in range(len(label)):
         label_bin = bin(label[i])
-        print(label_bin)
+        label_bin = ['0'] * (n_bits - len(label_bin[2:])) + list(label_bin[2:])
+        for k in range(len(label_bin)):
+            natural_label[i][k] = label_bin[k]
 
-def create_nn(output_activation,output_neurons):
+    return natural_label
+
+
+def create_nn(output_activation, output_neurons):
     model = models.Sequential()
     model.add(layers.Dense(64, activation='relu', input_shape=(10000,)))
     model.add(layers.Dense(64, activation='relu'))
@@ -44,53 +121,55 @@ def main():
                       'binary_crossentropy']
     output_neurons = [46, 46, 6]
     output_activation = ['softmax', 'softmax', 'sigmoid']
+    epoch = 9
 
     x_train = vectorize_sequences(train_data)
     x_test = vectorize_sequences(test_data)
 
     #Update the labels to follow the one hot encoding
     one_hot_train_labels = to_categorical(train_labels)
-    one_hot_test_labels = to_categorical(test_labels) 
-    
-    to_natural(train_labels,6)
-    #Create a dataset for validation
-    # x_val = x_train[:1000]
-    # partial_x_train = x_train[1000:]
-    # y_val = one_hot_train_labels[:1000]
-    # partial_y_train = one_hot_train_labels[1000:]
+    one_hot_test_labels = to_categorical(test_labels)
 
-    # for k in range(2):
-    #     model = create_nn(output_activation[k], output_neurons[k])
-    #     model.summary()
-        # model.compile(optimizer='rmsprop', loss=loss_functions[k],
-        #             metrics=['accuracy'])
-        # history = model.fit(partial_x_train, partial_y_train, epochs=9, 
-        #                     batch_size=512, validation_data=(x_val, y_val))
-        # results[i] = model.evaluate(x_test, one_hot_test_labels)
-    
-    # print(results)
-    
-    # loss = history.history['loss']
-    # val_loss = history.history['val_loss']
-    # epochs = range(1, len(loss) + 1)
-    # plt.plot(epochs, loss, 'bo', label='Training loss')
-    # plt.plot(epochs, val_loss, 'b', label='Validation loss')
-    # plt.title('Training and validation loss')
-    # plt.xlabel('Epochs')
-    # plt.ylabel('Loss')
-    # plt.legend()
-    # plt.show()
+    #Update the labels to follow the binary natural representation
+    #(0-46 in decimals)
+    natural_train_labels = to_natural(train_labels, 6)
+    natural_test_labels = to_natural(test_labels, 6)
+    x_val = x_train[:1000]
+    partial_x_train = x_train[1000:]
+    y_val_one_hot = one_hot_train_labels[:1000]
+    partial_y_train_one_hot = one_hot_train_labels[1000:]
+    y_val_natural = natural_train_labels[:1000]
+    partial_y_train_natural = natural_train_labels[1000:]
 
-    # plt.clf()
-    # acc = history.history['accuracy']
-    # val_acc = history.history['val_accuracy']
-    # plt.plot(epochs, acc, 'bo', label='Training acc')
-    # plt.plot(epochs, val_acc, 'b', label='Validation acc')
-    # plt.title('Training and validation accuracy')
-    # plt.xlabel('Epochs')
-    # plt.ylabel('Accuracy')
-    # plt.legend()
-    # plt.show()
+    results = np.zeros((3,2))
+    loss = np.zeros((3,epoch))
+    val_loss = np.zeros((3,epoch))
+    acc = np.zeros((3,epoch))
+    val_acc = np.zeros((3,epoch))
+    for k in range(len(output_neurons)):
+        model = create_nn(output_activation[k], output_neurons[k])
+        model.summary()
+        model.compile(optimizer='rmsprop', loss=loss_functions[k],
+                    metrics=['accuracy'])
+        if (k < 2):
+            history = model.fit(partial_x_train, partial_y_train_one_hot,
+                                epochs=epoch, batch_size=512,
+                                validation_data=(x_val, y_val_one_hot))
+            results[k] = model.evaluate(x_test, one_hot_test_labels)
+        else:
+            history = model.fit(partial_x_train, partial_y_train_natural,
+                                epochs=9, batch_size=512,
+                                validation_data=(x_val, y_val_natural))
+            results[k] = model.evaluate(x_test, natural_test_labels)
+        loss[k] = history.history['loss']
+        val_loss[k] = history.history['val_loss']
+        acc[k] = history.history['accuracy']
+        val_acc[k] = history.history['val_accuracy']
+
+    plot_graph(2,loss, val_loss, acc, val_acc, epoch)
+    print(results)
+    
+
 
 main()
         
